@@ -28,7 +28,7 @@ public abstract class ByteChannelSequentialBase(
             state.closed = value
         }
 
-    protected val writable: BytePacketBuilder = BytePacketBuilder(0, pool)
+    protected val writable: BytePacketBuilder = BytePacketBuilder(pool)
     protected val readable: ByteReadPacket = ByteReadPacket(initial, pool)
 
     private val slot = AwaitingSlot()
@@ -382,10 +382,10 @@ public abstract class ByteChannelSequentialBase(
         }
     }
 
-    override suspend fun readRemaining(limit: Long, headerSizeHint: Int): ByteReadPacket {
+    override suspend fun readRemaining(limit: Long): ByteReadPacket {
         ensureNotFailed()
 
-        val builder = BytePacketBuilder(headerSizeHint)
+        val builder = BytePacketBuilder()
 
         val size = minOf(limit, readable.remaining)
         builder.writePacket(readable, size)
@@ -418,10 +418,10 @@ public abstract class ByteChannelSequentialBase(
         return builder.build()
     }
 
-    override suspend fun readPacket(size: Int, headerSizeHint: Int): ByteReadPacket {
+    override suspend fun readPacket(size: Int): ByteReadPacket {
         checkClosed(size)
 
-        val builder = BytePacketBuilder(headerSizeHint)
+        val builder = BytePacketBuilder()
 
         var remaining = size
         val partSize = minOf(remaining.toLong(), readable.remaining).toInt()
