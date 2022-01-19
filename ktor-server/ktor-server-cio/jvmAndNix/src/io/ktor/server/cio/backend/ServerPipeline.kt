@@ -35,7 +35,6 @@ public fun CoroutineScope.startServerConnectionPipeline(
     timeout: WeakTimeoutQueue,
     handler: HttpRequestHandler
 ): Job = launch(HttpPipelineCoroutine) {
-    @OptIn(ObsoleteCoroutinesApi::class, ExperimentalCoroutinesApi::class)
     val actorChannel = Channel<ByteReadChannel>(capacity = 3)
 
     launch(
