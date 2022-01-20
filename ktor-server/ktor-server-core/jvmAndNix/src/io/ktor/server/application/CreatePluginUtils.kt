@@ -85,8 +85,13 @@ public fun <PluginConfigT : Any> createRouteScopedPlugin(
         pipeline: ApplicationCallPipeline,
         configure: PluginConfigT.() -> Unit
     ): PluginInstance {
-        check(pipeline is Route)
-        return createPluginInstance(pipeline.application, pipeline, body, createConfiguration, configure)
+        val application = when (pipeline) {
+            is Route -> pipeline.application
+            is Application -> pipeline
+            else -> error("Unsupported pipeline type: ${pipeline::class}")
+        }
+
+        return createPluginInstance(application, pipeline, body, createConfiguration, configure)
     }
 }
 
@@ -193,5 +198,6 @@ private fun <Configuration : Any, Plugin : ApplicationPluginBuilder<Configuratio
         it.action(pipeline.sendPipeline)
     }
 
-    hooks.forEach { it.install(application) }
+    println("   installing hooks: ${hooks.size}")
+    hooks.forEach { it.install(pipeline) }
 }
