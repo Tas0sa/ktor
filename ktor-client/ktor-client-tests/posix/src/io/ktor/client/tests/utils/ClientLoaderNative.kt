@@ -33,7 +33,7 @@ actual abstract class ClientLoader actual constructor(private val timeoutSeconds
         if (skipEngines.any { it.startsWith("native") }) return
 
         val skipEnginesLowerCase = skipEngines.map { it.lowercase() }.toSet()
-        val filteredEngines = engines.filter {
+        val filteredEngines: List<HttpClientEngineFactory<HttpClientEngineConfig>> = engines.filter {
             val name = it.toString().lowercase()
             !skipEnginesLowerCase.contains(name) && !skipEnginesLowerCase.contains("native:$name")
         }
@@ -41,10 +41,8 @@ actual abstract class ClientLoader actual constructor(private val timeoutSeconds
         val failures = mutableListOf<TestFailure>()
         for (engine in filteredEngines) {
             val result = runCatching {
-                testWithEngine(engine) {
-                    withTimeout(timeoutSeconds.toLong() * 1000L) {
-                        block()
-                    }
+                testWithEngine(engine, timeout = timeoutSeconds.toLong() * 1000L) {
+                    block()
                 }
             }
 

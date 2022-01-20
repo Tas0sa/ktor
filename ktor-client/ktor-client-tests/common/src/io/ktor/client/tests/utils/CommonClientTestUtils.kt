@@ -33,16 +33,18 @@ const val TCP_SERVER: String = "http://127.0.0.1:8082"
  */
 fun testWithEngine(
     engine: HttpClientEngine,
+    timeout: Long = 60 * 1000L,
     block: suspend TestClientBuilder<*>.() -> Unit
-) = testWithClient(HttpClient(engine), block)
+) = testWithClient(HttpClient(engine), timeout, block)
 
 /**
  * Perform test with selected [client].
  */
 private fun testWithClient(
     client: HttpClient,
+    timeout: Long,
     block: suspend TestClientBuilder<HttpClientEngineConfig>.() -> Unit
-) = testSuspend {
+) = testSuspend(timeout = timeout) {
     val builder = TestClientBuilder<HttpClientEngineConfig>().also { it.block() }
 
     concurrency(builder.concurrency) { threadId ->
@@ -63,8 +65,9 @@ private fun testWithClient(
 fun <T : HttpClientEngineConfig> testWithEngine(
     factory: HttpClientEngineFactory<T>,
     loader: ClientLoader? = null,
+    timeout: Long = 60L * 1000L,
     block: suspend TestClientBuilder<T>.() -> Unit
-) = testSuspend {
+) = testSuspend(timeout = timeout) {
     val builder = TestClientBuilder<T>().apply { block() }
 
     if (builder.dumpAfterDelay > 0 && loader != null) {
@@ -122,6 +125,6 @@ fun TestClientBuilder<*>.test(block: suspend TestInfo.(client: HttpClient) -> Un
     test = block
 }
 
-fun TestClientBuilder<*>.after(block: suspend (client: HttpClient) -> Unit): Unit { // ktlint-disable no-unit-return
+fun TestClientBuilder<*>.after(block: suspend (client: HttpClient) -> Unit) { // ktlint-disable no-unit-return
     after = block
 }

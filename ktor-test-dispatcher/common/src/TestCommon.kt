@@ -12,5 +12,6 @@ import kotlin.coroutines.*
  */
 public expect fun testSuspend(
     context: CoroutineContext = EmptyCoroutineContext,
+    timeout: Long = 60L * 1000L,
     block: suspend CoroutineScope.() -> Unit
 )

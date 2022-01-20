@@ -13,5 +13,8 @@ import kotlin.coroutines.*
 @OptIn(DelicateCoroutinesApi::class)
 public actual fun testSuspend(
     context: CoroutineContext,
+    timeout: Long,
     block: suspend CoroutineScope.() -> Unit
-): dynamic = GlobalScope.promise(block = block, context = context)
+): dynamic = GlobalScope.promise(block = {
+    withTimeout(timeout, block)
+}, context = context)
