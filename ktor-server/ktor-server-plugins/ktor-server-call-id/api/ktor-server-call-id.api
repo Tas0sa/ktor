@@ -34,7 +34,7 @@ public final class io/ktor/server/plugins/CallIdKt {
 	public static synthetic fun сallIdMdc$default (Lio/ktor/server/plugins/CallLogging$Configuration;Ljava/lang/String;ILjava/lang/Object;)V
 }
 
-public final class io/ktor/server/plugins/CallIdNewKt {
+public final class io/ktor/server/plugins/CallIdKt {
 	public static final field CALL_ID_DEFAULT_DICTIONARY Ljava/lang/String;
 	public static final fun generate (Lio/ktor/server/plugins/CallIdConfig;ILjava/lang/String;)V
 	public static synthetic fun generate$default (Lio/ktor/server/plugins/CallIdConfig;ILjava/lang/String;ILjava/lang/Object;)V
