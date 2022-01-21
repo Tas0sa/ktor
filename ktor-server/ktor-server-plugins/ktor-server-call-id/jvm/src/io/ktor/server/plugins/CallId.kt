@@ -40,7 +40,7 @@ public class RejectedCallIdException(
 /**
  * [CallId] plugin's configuration
  */
-public class CallIdConfiguration {
+public class CallIdConfig {
     internal val retrievers = ArrayList<CallIdProvider>()
     internal val generators = ArrayList<CallIdProvider>()
     internal val responseInterceptors = ArrayList<(call: ApplicationCall, CallId: String) -> Unit>()
@@ -165,23 +165,23 @@ internal val CallIdKey: AttributeKey<String> = AttributeKey<String>("ExtractedCa
 
 /**
  * Retrieves and generates if necessary a call id. A call id (or correlation id) could be retrieved_ from a call
- * via [CallIdConfiguration.retrieve] function. Multiple retrieve functions could be configured that will be invoked
+ * via [CallIdConfig.retrieve] function. Multiple retrieve functions could be configured that will be invoked
  * one by one until one of them return non-null value. If no value has been provided by retrievers then a generator
- * could be applied to generate a new call id. Generators could be provided via [CallIdConfiguration.generate] function.
+ * could be applied to generate a new call id. Generators could be provided via [CallIdConfig.generate] function.
  * Similar to retrieve, multiple generators could be configured so they will be invoked one by one.
  * Usually call id is passed via [io.ktor.http.HttpHeaders.XRequestId] so
- * one could use [CallIdConfiguration.retrieveFromHeader] function to retrieve call id from a header.
+ * one could use [CallIdConfig.retrieveFromHeader] function to retrieve call id from a header.
  *
  * All retrieved or generated call ids are verified against [CALL_ID_DEFAULT_DICTIONARY] by default. Alternatively
- * a custom dictionary or functional predicate could be provided via [CallIdConfiguration.verify] that could
+ * a custom dictionary or functional predicate could be provided via [CallIdConfig.verify] that could
  * pass a valid call id, discard an illegal call id
  * or reject completely an [ApplicationCall] with [HttpStatusCode.BadRequest] if an [RejectedCallIdException] is thrown.
  * Please note that this rejection functionality is not compatible with [StatusPages] for now and you cannot
  * configure rejection response message.
  *
  * Once a call id is retrieved or generated, it could be accessed via [ApplicationCall.CallId] otherwise it will be
- * always `null`. Also a call id could be replied with response by registering [CallIdConfiguration.reply] or
- * [CallIdConfiguration.replyToHeader] so client will be able to know call id in case when it is generated.
+ * always `null`. Also a call id could be replied with response by registering [CallIdConfig.reply] or
+ * [CallIdConfig.replyToHeader] so client will be able to know call id in case when it is generated.
  *
  * Please note that call id plugin is only intended for debugging and troubleshooting purposes to correlate
  * client requests with logs in multitier/microservices architecture. So usually it is not guaranteed that call id
@@ -189,9 +189,9 @@ internal val CallIdKey: AttributeKey<String> = AttributeKey<String>("ExtractedCa
  *
  * [CallId] plugin will be installed to [BeforeSetup.phase] into [ApplicationCallPipeline].
  */
-public val CallId: RouteScopedPlugin<CallIdConfiguration, PluginInstance> = createRouteScopedPlugin(
+public val CallId: RouteScopedPlugin<CallIdConfig, PluginInstance> = createRouteScopedPlugin(
     "CallId",
-    ::CallIdConfiguration
+    ::CallIdConfig
 ) {
     val providers = (pluginConfig.retrievers + pluginConfig.generators).toTypedArray()
     val repliers = pluginConfig.responseInterceptors.toTypedArray()
@@ -240,12 +240,12 @@ public const val CALL_ID_DEFAULT_DICTIONARY: String = "abcdefghijklmnopqrstuvwxy
  * Also note that you should use the same dictionary for [CallIdVerifier] otherwise a generated call id could be
  * discarded or may lead to complete call rejection.
  *
- * @see [CallIdConfiguration.verify]
+ * @see [CallIdConfig.verify]
  *
  * @param length of call ids to be generated, should be positive
  * @param dictionary to be used to generate ids, shouldn't be empty and it shouldn't contain duplicates
  */
-public fun CallIdConfiguration.generate(length: Int = 64, dictionary: String = CALL_ID_DEFAULT_DICTIONARY) {
+public fun CallIdConfig.generate(length: Int = 64, dictionary: String = CALL_ID_DEFAULT_DICTIONARY) {
     require(length >= 1) { "Call id should be at least one characters length: $length" }
     require(dictionary.length > 1) { "Dictionary should consist of several different characters" }
 
@@ -264,7 +264,6 @@ public fun CallIdConfiguration.generate(length: Int = 64, dictionary: String = C
 public fun CallLogging.Configuration.сallIdMdc(name: String = "CallId") {
     mdc(name) { it.callId }
 }
-
 
 private fun String.duplicates() = toCharArray().groupBy { it }.filterValues { it.size > 1 }.keys.sorted()
 private fun Random.nextString(length: Int, dictionary: CharArray): String {
